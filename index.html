@@ -4,11 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            width: 800px;
+            height: 1000px;
+            background-color: lightgray;
+            border-radius: 7%;
+            font-size: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .bar {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 10px;
+            background-color: green;
+            border-radius: 10px;
+            z-index: 20;
+        }
+        .hour-marker {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333;
+            border-bottom: 10px solid gray;
+            line-height: 10px;
+            margin-top: -20px;
+        }
+        .hour-marker span {
+            margin-left: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<body className="flex items-center justify-center h-screen">
-    <div className="bg-gray-200 shadow-md rounded-md w-84 h-96">
-        <div className="bg-green-600 h-2 w-full -mx-10 rounded-fulll"></div>
+<body style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+    <div class="container">
+        <div id="bar" class="bar"></div>
     </div>
 </body>
+<script>
+    const startHour = 0;
+    const endHour = 24;
+
+    function createHourMarkers() {
+        const container = document.querySelector('.container');
+        const containerHeight = container.offsetHeight;
+        const hoursInRange = endHour - startHour;
+
+        for (let i = 0; i <= hoursInRange; i++) {
+            const hourMarker = document.createElement('div');
+            hourMarker.classList.add('hour-marker');
+
+            // Set position for each hour
+            hourMarker.style.top = `${(i / hoursInRange) * containerHeight}px`;
+
+            // Format hour in 24h format
+            const formattedHour = (startHour + i).toString().padStart(2, '0') + ":00";
+            hourMarker.innerHTML = `<span>${formattedHour}</span>`;
+
+            container.appendChild(hourMarker);
+        }
+    }
+
+    function updateBarPosition() {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, 0, 0);
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour, 0, 0);
+
+        const totalDayTime = endOfDay - startOfDay;
+        const timePassed = now - startOfDay;
+        const percentageOfDayPassed = (timePassed / totalDayTime) * 100;
+
+        // Set the top position of the bar based on the percentage of the day passed
+        const containerHeight = 1000; // height of the container
+        const newTopPosition = (percentageOfDayPassed / 100) * containerHeight;
+
+        const bar = document.getElementById("bar");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const value = urlParams.get('value');
+
+        bar.innerHTML = percentageOfDayPassed/100 * value
+        bar.style.top = newTopPosition + "px";
+    }
+
+    // Initialize hour markers and update the bar position
+    createHourMarkers();
+    updateBarPosition();
+
+    // Update the bar position every second
+    setInterval(updateBarPosition, 1000);
+</script>
 </html>
